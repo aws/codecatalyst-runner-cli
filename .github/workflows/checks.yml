@@ -1,0 +1,135 @@
+name: check
+on: [pull_request, workflow_dispatch]
+
+env:
+  CGO_ENABLED: 0
+
+jobs:
+  scan:
+    name: scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Scan current project
+        uses: anchore/scan-action@v3
+        with:
+          path: "."
+          output-format: table
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.work
+          check-latest: true
+          cache-dependency-path: "**/go.sum"
+      - name: Install dev dependencies
+        run: make dev-deps
+      - name: Run golangci-lint
+        run: make lint
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.work
+          check-latest: true
+          cache-dependency-path: "**/go.sum"
+
+      - name: Install dev dependencies
+        run: make dev-deps
+
+      - name: Run tests
+        run: make test
+
+      - name: Generate code coverage report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage.xml
+          badge: false
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: false
+          indicators: true
+          output: both
+          thresholds: '48 60'
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+  snapshot-ccr-cli:
+    name: snapshot-ccr-cli
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.work
+          cache-dependency-path: "**/go.sum"
+          check-latest: true
+      - uses: anchore/sbom-action/download-syft@v0.14.3
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          workdir: codecatalyst-runner
+          version: latest
+          args: release --snapshot --clean
+      - name: Capture x86_64 (64-bit) Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-linux-amd64
+          path: codecatalyst-runner/dist/ccr_linux_amd64_v1/ccr
+      - name: Capture i386 (32-bit) Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-linux-i386
+          path: codecatalyst-runner/dist/ccr_linux_386/ccr
+      - name: Capture arm64 (64-bit) Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-linux-arm64
+          path: codecatalyst-runner/dist/ccr_linux_arm64/ccr
+      - name: Capture x86_64 (64-bit) Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-windows-amd64
+          path: codecatalyst-runner/dist/ccr_windows_amd64_v1/ccr.exe
+      - name: Capture i386 (32-bit) Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-windows-i386
+          path: codecatalyst-runner/dist/ccr_windows_386/ccr.exe
+      - name: Capture arm64 (64-bit) Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-windows-arm64
+          path: codecatalyst-runner/dist/ccr_windows_arm64/ccr.exe
+      - name: Capture x86_64 (64-bit) MacOS binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-macos-amd64
+          path: codecatalyst-runner/dist/ccr_darwin_amd64_v1/ccr
+      - name: Capture arm64 (64-bit) MacOS binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccr-macos-arm64
+          path: codecatalyst-runner/dist/ccr_darwin_arm64/ccr

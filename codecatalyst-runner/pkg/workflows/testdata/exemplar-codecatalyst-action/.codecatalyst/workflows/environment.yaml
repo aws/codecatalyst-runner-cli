@@ -1,0 +1,21 @@
+Name: sample
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Actions:
+  FirstAction:
+    Identifier: aws/build@v1
+    Environment:
+      Name: Dev
+      Connections:
+        - Name: codecatalyst-account-connection
+          Role: codecatalyst-cdk-role
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:     
+      Steps:
+        - Run: aws sts get-caller-identity

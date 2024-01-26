@@ -1,0 +1,59 @@
+Name: shared
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Compute: # Define compute configuration.
+  Type: EC2
+  SharedInstance: true
+Actions:
+  Custom:
+    Identifier: .
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:
+      who-to-greet: 'TEST'
+      how-to-greet: 'TEST'
+  FirstAction:
+    Identifier: aws/build@v1
+    Inputs:
+      Variables:
+        - Name: VAR1
+          Value: foo
+    DependsOn:
+      - Custom
+    Outputs:
+      Variables:
+        - VAR1
+        - VAR2
+    Configuration:
+      Steps:
+        - Run: ls -alFt
+        - Run: pwd
+        - Run: ls | grep package.json
+        - Run: echo ${VAR1} | grep foo
+        - Run: VAR2=${VAR1}o
+        - Run: env | grep VAR2=fooo
+        - Run: echo ${VAR2} | grep foo
+        - Run: echo ${Secrets.SAMPLE_SECRET} | grep mysecretvalue
+        - Run: mkdir -p .out
+        - Run: echo "hello world" > .out/output.txt
+        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+  Group1:
+    Actions:
+      SubAction2:
+        Identifier: aws/build@v1
+        DependsOn:
+          - FirstAction
+        Configuration:
+          Steps:
+            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: grep "hello world" ./.out/output.txt
+

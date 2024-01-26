@@ -1,0 +1,28 @@
+SchemaVersion: '1.0'
+Name: 'hello-world-action'
+Version: '0.0.0'
+Description: 'This Action greets someone and outputs who was greeted'
+Configuration:
+  who-to-greet:
+    Description: 'Who are we greeting here'
+    Required: true
+    DisplayName: 'Who to greet'
+    Type: string
+  how-to-greet:
+    Description: 'How to greet the person'
+    Required: false
+    DisplayName: 'How to greet'
+    Type: string
+    Default: 'Hello there,'
+Outputs:
+  Variables:
+    greeting:
+      Description: the greeting
+Inputs:
+  Sources:
+    Required: true
+Environment:
+  Required: false
+Runs:
+  Using: 'node16'
+  Main: 'pkg/index.js'

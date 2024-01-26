@@ -1,0 +1,47 @@
+Name: sample
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Actions:
+  FirstAction:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:     
+      Steps:
+        - Run: WhoToGreet=Alice
+        - Run: HowToGreet=Hey
+        - Run: df
+        - Run: env | grep CATALYST
+        - Run: pwd
+        - Run: ls -alFt
+    Outputs:
+      Variables:
+        - WhoToGreet
+        - HowToGreet
+  Custom:
+    Identifier: .
+    Inputs:
+      Sources:
+        - WorkflowSource
+      Variables:
+        - Name: Who
+          Value: ${FirstAction.WhoToGreet}
+    Configuration:
+      who-to-greet: ${Who}
+      how-to-greet: ${FirstAction.HowToGreet}
+    Outputs:
+      Variables:
+        - greeting
+  FinalAction:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:     
+      Steps:
+        - Run: echo ${Custom.greeting} | grep "Hey Alice"

@@ -1,0 +1,101 @@
+Name: cache
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Actions:
+  Setup:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Configuration:
+      Steps:
+        - Run: rm -rf .out/* || true
+        - Run: rm -rf .out2/* || true
+        - Run: rm -rf /root/stuff/* || true
+    Caching:
+      FileCaching:
+        cacheKey1:
+          Path: .out
+        cacheKey2:
+          Path: .out2/file.txt
+        cacheKey3:
+          Path: /root/stuff
+  RelativePathMiss:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    DependsOn:
+      - Setup
+    Configuration:
+      Steps:
+        - Run: "! test -e .out/output.txt"
+        - Run: mkdir -p .out
+        - Run: echo "hello world" > .out/output.txt
+        - Run: "! test -e .out2/file.txt"
+        - Run: mkdir -p .out2
+        - Run: echo "hello again" > .out2/file.txt
+    Caching:
+      FileCaching:
+        cacheKey1:
+          Path: .out
+        cacheKey2:
+          Path: .out2/file.txt
+  RelativePathHit:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    DependsOn:
+      - RelativePathMiss
+    Configuration:
+      Steps:
+        - Run: ls -alFtR
+        - Run: test -e .out/output.txt
+        - Run: grep "hello world" .out/output.txt
+        - Run: rm -rf .out/output.txt
+        - Run: test -e .out2/file.txt
+        - Run: grep "hello again" .out2/file.txt
+        - Run: rm -rf .out2/file.txt
+    Caching:
+      FileCaching:
+        cacheKey1:
+          Path: .out
+        cacheKey2:
+          Path: .out2/file.txt
+  AbsolutePathMiss:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    DependsOn:
+      - Setup
+    Configuration:
+      Steps:
+        - Run: "! test -e /root/stuff/foo.txt"
+        - Run: mkdir -p /root/stuff
+        - Run: echo "hi" > /root/stuff/foo.txt
+    Caching:
+      FileCaching:
+        cacheKey3:
+          Path: /root/stuff
+  AbsolutePathHit:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    DependsOn:
+      - AbsolutePathMiss
+    Configuration:
+      Steps:
+        - Run: test -e /root/stuff/foo.txt
+        - Run: grep "hi" /root/stuff/foo.txt
+        - Run: rm -rf /root/stuff/foo.txt
+    Caching:
+      FileCaching:
+        cacheKey3:
+          Path: /root/stuff

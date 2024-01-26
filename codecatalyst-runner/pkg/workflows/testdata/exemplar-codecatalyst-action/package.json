@@ -1,0 +1,24 @@
+{
+  "name": "exemplar-codecatalyst-action",
+  "version": "1.0.0",
+  "description": "This Action greets someone and records the time",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "tsc && jest && ncc build -o pkg",
+    "all": "npm run build && npm run package"
+  },
+  "dependencies": {
+    "@aws/codecatalyst-adk-core": "^1.0.15",
+    "@aws/codecatalyst-project": "^1.0.15",
+    "@aws/codecatalyst-run-summaries": "^1.0.15",
+    "@aws/codecatalyst-space": "^1.0.15",
+    "@aws/codecatalyst-adk-utils": "^1.0.15",
+    "@vercel/ncc": "^0.36.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "@tsconfig/node16": "^1.0.3",
+    "typescript": "^5.0.3"
+  }
+}

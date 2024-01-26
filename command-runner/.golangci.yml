@@ -1,0 +1,53 @@
+linters-settings:
+  gocyclo:
+    # minimal code complexity to report, 30 by default (but we recommend 10-20)
+    min-complexity: 18
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+  revive:
+    rules:
+      - name: indent-error-flow
+        disabled: true
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+          - "!$test"
+        deny:
+          - pkg: github.com/OpenPeeDeeP/depguard$
+            desc: old version, use v2
+
+issues:
+  include:
+    - EXC0002  # EXC0002 golint: Annoying issue about not having a comment. The rare codebase has such comments
+    - EXC0004  # EXC0004 govet: Common false positives
+    - EXC0006  # EXC0006 gosec: Too many false-positives on 'unsafe' usage
+    - EXC0011  # EXC0011 stylecheck: Annoying issue about not having a comment. The rare codebase has such comments
+    - EXC0012  # EXC0012 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - EXC0013  # EXC0013 revive: Annoying issue about not having a comment. The rare codebase has such comments
+    - EXC0014  # EXC0014 revive: Annoying issue about not having a comment. The rare codebase has such comments
+
+
+linters:
+  enable:
+    # - contextcheck # too many false positives
+    - depguard
+    - dupl
+    - unused
+    - exportloopref
+    - gocritic
+    - gocyclo
+    - goimports
+    - gosec
+    - govet
+    - importas
+    - megacheck
+    - misspell
+    - nakedret
+    - nolintlint
+    - prealloc
+    - revive
+    - unconvert
+    - whitespace

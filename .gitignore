@@ -1,0 +1,10 @@
+dist/
+coverage.txt
+coverage.xml
+.go/
+dist/
+.idea
+profile.out
+trace.out
+.vscode
+repolinter.txt

@@ -1,0 +1,23 @@
+Name: 1P
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Compute: # Define compute configuration.
+  Type: EC2
+  SharedInstance: true 
+Actions:
+ CDKBootstrapAction:
+    Identifier: aws/cdk-bootstrap@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Environment:
+      Name: Dev
+      Connections:
+        - Name: codecatalyst-account-connection
+          Role: codecatalyst-cdk-role
+    Configuration:
+      Region: 'us-east-2'

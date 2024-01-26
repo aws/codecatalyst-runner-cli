@@ -1,0 +1,13 @@
+SchemaVersion: 1.0
+Name: test1
+Version: 0.0.0
+Description: Run test against a repository
+Inputs:
+  Sources:
+    Required: true
+Environment:
+  Required: false
+Runs:
+  Using: docker
+  Image: Dockerfile
+  Entrypoint: /app/main.sh

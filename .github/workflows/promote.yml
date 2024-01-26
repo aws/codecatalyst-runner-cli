@@ -1,0 +1,30 @@
+name: promote
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - VERSION
+      - "*/VERSION"
+
+env:
+  CGO_ENABLED: 0
+
+jobs:
+  promote:
+    name: promote
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ssh-key: ${{secrets.SSH_DEPLOY_KEY}}
+          fetch-depth: 0
+          ref: main
+      - uses: fregante/setup-git-user@v2
+      - uses: actions/setup-go@v4
+        with:
+          go-version-file: go.work
+          check-latest: true
+          cache-dependency-path: "**/go.sum"
+      - name: Bump version
+        run: make bump-version

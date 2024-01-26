@@ -1,0 +1,90 @@
+Name: sample
+SchemaVersion: "1.0"
+Triggers:
+  - Type: PullRequest
+    Events: [ open, revision ]
+    Branches:
+      - feature-.*
+Actions:
+  FirstAction:
+    Identifier: aws/build@v1
+    Inputs:
+      Sources:
+        - WorkflowSource
+      Variables:
+        - Name: VAR1
+          Value: foo
+    Outputs:
+      Variables:
+        - VAR1
+        - VAR2
+      Artifacts:
+        - Name: ARTIFACT1
+          Files:
+            - .out/*
+    Configuration:
+      Steps:
+        - Run: echo ${VAR1} | grep foo
+        - Run: VAR2=${VAR1}o
+        - Run: env | grep VAR2=fooo
+        - Run: echo ${VAR2} | grep foo
+        - Run: echo ${Secrets.SAMPLE_SECRET} | grep mysecretvalue
+        - Run: mkdir -p .out
+        - Run: echo "hello world" > .out/output.txt
+        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_
+        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+  Group1:
+    Actions:
+      SubAction1:
+        Identifier: aws/build@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+        Configuration:
+          Steps:
+            - Run: echo ${FirstAction.VAR1} | grep foo
+            - Run: echo ${FirstAction.VAR2} | grep fooo
+            - Run: VAR3=${FirstAction.VAR2}o
+            - Run: env | grep VAR3=foooo
+            - Run: mkdir -p .out
+            - Run: echo "hello again" > .out/output2.txt
+            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        Outputs:
+          Variables:
+            - VAR3
+          Artifacts:
+            - Name: ARTIFACT2
+              Files:
+                - .out/*
+      SubAction2:
+        Identifier: aws/build@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+          Artifacts:
+            - ARTIFACT1
+        Configuration:
+          Steps:
+            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: echo $CATALYST_SOURCE_DIR_ARTIFACT1
+            - Run: grep "hello world" $CATALYST_SOURCE_DIR_ARTIFACT1/.out/output.txt
+  FinalAction:
+    Identifier: aws/build@v1
+    Inputs:
+      Artifacts:
+        - ARTIFACT2
+    Configuration:
+      Steps:
+        - Run: echo ${Group1.SubAction1.VAR3} | grep foooo
+        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/s3/01
+        - Run: pwd|grep /codecatalyst/output/src/s3/01
+        - Run: ls -alFt ${CATALYST_SOURCE_DIR_ARTIFACT2}/
+        - Run: echo ${CATALYST_SOURCE_DIR_ARTIFACT2}
+        - Run: grep "hello again" $CATALYST_SOURCE_DIR_ARTIFACT2/.out/output2.txt
+

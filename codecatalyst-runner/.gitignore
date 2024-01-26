@@ -1,0 +1,6 @@
+dist/
+coverage.txt
+.go/
+dist/
+.idea
+.car/
