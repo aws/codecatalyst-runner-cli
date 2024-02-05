@@ -10,7 +10,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.5.0
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/moby/buildkit v0.12.4
+	github.com/moby/buildkit v0.12.5
 	github.com/moby/patternmatcher v0.6.0
 	github.com/opencontainers/image-spec v1.1.0-rc6
 	github.com/opencontainers/selinux v1.11.0
