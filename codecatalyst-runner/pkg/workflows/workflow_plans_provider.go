@@ -129,7 +129,7 @@ func (wpp *workflowPlansProvider) planAction(ctx context.Context, actionName str
 		var runs actions.Runs
 		runs = actions.Runs{
 			Using:      actions.UsingTypeDocker,
-			Image:      "docker://public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0",
+			Image:      actions.CodeCatalystImage,
 			Entrypoint: "/bin/echo",
 		}
 		outputs := actions.Outputs{
