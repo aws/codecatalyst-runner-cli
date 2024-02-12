@@ -21,6 +21,7 @@ type NewActionPlanParams struct {
 	DependsOn     []string             // dependencies
 }
 
+const CodeCatalystImage = "docker://public.ecr.aws/c8t2t1h8/al2/curated:1.3-x86_64-ec2"
 const containerActionDir = "/codecatalyst/output/action"
 
 // NewActionPlan creates a new Plan from the given params
@@ -143,9 +144,9 @@ func (ap *actionPlan) loadNodeAction(action *Action, steps []string, executionTy
 	if executionType == runner.ExecutionTypeDocker || executionType == runner.ExecutionTypeFinch {
 		switch action.Runs.Using {
 		case UsingTypeNode12:
-			image = "docker://public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0"
+			image = CodeCatalystImage
 		case UsingTypeNode16:
-			image = "docker://public.ecr.aws/codebuild/amazonlinux2-x86_64-standard:5.0"
+			image = CodeCatalystImage
 		default:
 			return fmt.Errorf("unsupported value for 'using': %s", action.Runs.Using)
 		}
