@@ -21,7 +21,8 @@ type NewActionPlanParams struct {
 	DependsOn     []string             // dependencies
 }
 
-const CodeCatalystImage = "docker://public.ecr.aws/c8t2t1h8/al2/curated:1.3-x86_64-ec2"
+// const CodeCatalystImage = "docker://public.ecr.aws/c8t2t1h8/al2/curated:1.3-x86_64-ec2"
+const CodeCatalystImage = "docker://public.ecr.aws/aws-mde/universal-image:latest"
 const containerActionDir = "/codecatalyst/output/action"
 
 // NewActionPlan creates a new Plan from the given params

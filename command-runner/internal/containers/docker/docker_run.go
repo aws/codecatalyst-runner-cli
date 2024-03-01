@@ -222,6 +222,7 @@ func (cr *dockerContainer) create(capAdd []string, capDrop []string) common.Exec
 			WorkingDir: input.WorkingDir,
 			Env:        input.Env,
 			Tty:        true,
+			User:       "root",
 		}
 		log.Ctx(ctx).Printf("Common container.Config ==> %+v", config)
 
