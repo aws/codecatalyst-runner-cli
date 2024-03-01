@@ -83,6 +83,9 @@ jobs:
   snapshot-ccr-cli:
     name: snapshot-ccr-cli
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
