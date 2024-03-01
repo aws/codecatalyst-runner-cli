@@ -21,6 +21,9 @@ jobs:
   release:
     name: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v3
         with:
@@ -31,6 +34,7 @@ jobs:
           check-latest: true
           cache-dependency-path: "**/go.sum"
       - uses: anchore/sbom-action/download-syft@v0.14.3
+      - uses: sigstore/cosign-installer@v3
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:

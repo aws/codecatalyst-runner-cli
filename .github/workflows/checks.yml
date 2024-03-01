@@ -83,6 +83,9 @@ jobs:
   snapshot-ccr-cli:
     name: snapshot-ccr-cli
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
@@ -91,49 +94,15 @@ jobs:
           cache-dependency-path: "**/go.sum"
           check-latest: true
       - uses: anchore/sbom-action/download-syft@v0.14.3
+      - uses: sigstore/cosign-installer@v3
       - name: GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
           workdir: codecatalyst-runner
           version: latest
           args: release --snapshot --clean
-      - name: Capture x86_64 (64-bit) Linux binary
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ccr-linux-amd64
-          path: codecatalyst-runner/dist/ccr_linux_amd64_v1/ccr
-      - name: Capture i386 (32-bit) Linux binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-linux-i386
-          path: codecatalyst-runner/dist/ccr_linux_386/ccr
-      - name: Capture arm64 (64-bit) Linux binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-linux-arm64
-          path: codecatalyst-runner/dist/ccr_linux_arm64/ccr
-      - name: Capture x86_64 (64-bit) Windows binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-windows-amd64
-          path: codecatalyst-runner/dist/ccr_windows_amd64_v1/ccr.exe
-      - name: Capture i386 (32-bit) Windows binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-windows-i386
-          path: codecatalyst-runner/dist/ccr_windows_386/ccr.exe
-      - name: Capture arm64 (64-bit) Windows binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-windows-arm64
-          path: codecatalyst-runner/dist/ccr_windows_arm64/ccr.exe
-      - name: Capture x86_64 (64-bit) MacOS binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-macos-amd64
-          path: codecatalyst-runner/dist/ccr_darwin_amd64_v1/ccr
-      - name: Capture arm64 (64-bit) MacOS binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: ccr-macos-arm64
-          path: codecatalyst-runner/dist/ccr_darwin_arm64/ccr
+          name: artifacts
+          path: codecatalyst-runner/dist/*
