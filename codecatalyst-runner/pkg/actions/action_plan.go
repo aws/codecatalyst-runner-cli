@@ -2,6 +2,7 @@ package actions
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -21,8 +22,16 @@ type NewActionPlanParams struct {
 	DependsOn     []string             // dependencies
 }
 
-const CodeCatalystImage = "docker://public.ecr.aws/c8t2t1h8/al2/curated:1.3-x86_64-ec2"
 const containerActionDir = "/codecatalyst/output/action"
+
+const DefaultCodeCatalystImage = "docker://public.ecr.aws/c8t2t1h8/al2/curated:1.3-x86_64-ec2"
+
+func CodeCatalystImage() string {
+	if val, ok := os.LookupEnv("CATALYST_IMAGE"); ok {
+		return val
+	}
+	return DefaultCodeCatalystImage
+}
 
 // NewActionPlan creates a new Plan from the given params
 func NewActionPlan(params *NewActionPlanParams) (runner.Plan, error) {
@@ -144,9 +153,9 @@ func (ap *actionPlan) loadNodeAction(action *Action, steps []string, executionTy
 	if executionType == runner.ExecutionTypeDocker || executionType == runner.ExecutionTypeFinch {
 		switch action.Runs.Using {
 		case UsingTypeNode12:
-			image = CodeCatalystImage
+			image = CodeCatalystImage()
 		case UsingTypeNode16:
-			image = CodeCatalystImage
+			image = CodeCatalystImage()
 		default:
 			return fmt.Errorf("unsupported value for 'using': %s", action.Runs.Using)
 		}

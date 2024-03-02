@@ -1,6 +1,3 @@
-//go:build all || docker
-// +build all docker
-
 package runner
 
 import (
@@ -37,7 +34,6 @@ func TestExecutor(t *testing.T) {
 			ExpectedType:  &containerCommandExecutor{},
 		},
 	} {
-
 		// setup the code under test
 		ctx := context.Background()
 		executor, err := newCommandExecutor(ctx, "testID", tt.ExecutionType, &tt.CommandGroup, &EnvironmentConfiguration{

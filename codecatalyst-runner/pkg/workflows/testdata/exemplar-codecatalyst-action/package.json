@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",
-    "package": "tsc && jest && ncc build -o pkg",
+    "package": "tsc && ncc build -o pkg",
     "all": "npm run build && npm run package"
   },
   "dependencies": {

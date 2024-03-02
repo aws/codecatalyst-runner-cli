@@ -1,6 +1,3 @@
-//go:build all || docker
-// +build all docker
-
 package runner
 
 import (
@@ -52,7 +49,6 @@ func TestRunAll(t *testing.T) {
 			},
 		},
 	} {
-
 		// setup the code under test
 		ctx := context.Background()
 

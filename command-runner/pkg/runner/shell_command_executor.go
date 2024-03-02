@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/aws/codecatalyst-runner-cli/command-runner/internal/fs"
 	"github.com/aws/codecatalyst-runner-cli/command-runner/pkg/common"
@@ -20,11 +22,13 @@ import (
 )
 
 type shellCommandExecutor struct {
-	Env        []string
-	Stdout     io.Writer
-	Stderr     io.Writer
-	WorkingDir string
-	CleanupDir string
+	Stdout         io.Writer
+	Stderr         io.Writer
+	Env            []string
+	WorkingDir     string
+	CloseExecutors []common.Executor
+	ctx            context.Context
+	mceDir         string
 }
 
 type newShellCommandExecutorParams struct {
@@ -32,41 +36,24 @@ type newShellCommandExecutorParams struct {
 }
 
 func newShellCommandExecutor(ctx context.Context, params *newShellCommandExecutorParams) (commandExecutor, error) {
-	execWorkingDir := params.WorkingDir
-	var cleanupDir string
-	for _, filemap := range params.FileMaps {
-		// only handle filemap for working directory in first pass
-		if resolvePath(filemap.SourcePath, params.WorkingDir) == resolvePath(".", params.WorkingDir) {
-			if filemap.Type == FileMapTypeCopyIn || filemap.Type == FileMapTypeCopyInWithGitignore {
-				// create temporary directory for the working directory
-				var err error
-				execWorkingDir, err = createCleanWorkdir(ctx, execWorkingDir)
-				if err != nil {
-					return nil, err
-				}
-				cleanupDir = filepath.Dir(execWorkingDir)
-			}
-		}
+	mceDir, err := os.MkdirTemp(fs.TmpDir(), "mce")
+	if err != nil {
+		return nil, err
 	}
+	closeExecutors := []common.Executor{}
 	for _, filemap := range params.FileMaps {
 		switch filemap.Type {
 		case FileMapTypeCopyOut:
-			if err := copyDir(
-				ctx,
-				resolvePath(filemap.SourcePath, params.WorkingDir),
-				resolvePath(filemap.TargetPath, execWorkingDir),
-				false,
-			); err != nil {
-				return nil, err
-			}
+			closeExecutors = append(closeExecutors, copyOut(ctx, mceDir, params.WorkingDir, filemap))
 		case FileMapTypeBind:
-			if resolvePath(filemap.SourcePath, params.WorkingDir) != resolvePath(".", params.WorkingDir) {
-				return nil, fmt.Errorf("unable to use bind mounts with shell executor for non-working directory '%s'", filemap.SourcePath)
+			// treat bind mount as symlink
+			if err := symlink(mceDir, params.WorkingDir, filemap); err != nil {
+				return nil, err
 			}
 		case FileMapTypeCopyIn:
 			if err := copyDir(
 				ctx,
-				resolvePath(filemap.TargetPath, execWorkingDir),
+				resolvePath(filemap.TargetPath, mceDir),
 				resolvePath(filemap.SourcePath, params.WorkingDir),
 				false,
 			); err != nil {
@@ -75,7 +62,7 @@ func newShellCommandExecutor(ctx context.Context, params *newShellCommandExecuto
 		case FileMapTypeCopyInWithGitignore:
 			if err := copyDir(
 				ctx,
-				resolvePath(filemap.TargetPath, execWorkingDir),
+				resolvePath(filemap.TargetPath, mceDir),
 				resolvePath(filemap.SourcePath, params.WorkingDir),
 				true,
 			); err != nil {
@@ -86,43 +73,81 @@ func newShellCommandExecutor(ctx context.Context, params *newShellCommandExecuto
 		}
 	}
 
+	closeExecutors = append(closeExecutors, setOutputs(mceDir, params.Stdout))
+	closeExecutors = append(closeExecutors, func(ctx context.Context) error {
+		log.Debug().Msgf("close() is removing %s", mceDir)
+		return os.RemoveAll(mceDir)
+	})
+
 	env := make([]string, 0)
+	var defaultDir string
 	if params.Env != nil {
 		for k, v := range params.Env {
-			env = append(env, fmt.Sprintf("%s=%s", k, v))
+			if strings.HasPrefix(k, "CATALYST_SOURCE_DIR_") {
+				v = resolvePath(v, mceDir)
+				if k == "CATALYST_SOURCE_DIR_WorkflowSource" || defaultDir == "" {
+					defaultDir = v
+				}
+			}
+			env = append(env, fmt.Sprintf("%s=%s", k, interpolate(v, params.Env)))
 		}
 	}
+	if defaultDir == "" {
+		defaultDir = params.WorkingDir
+	}
 	env = append(env, fmt.Sprintf("PATH=%s", os.Getenv("PATH")))
-	env = append(env, fmt.Sprintf("CATALYST_DEFAULT_DIR=%s", execWorkingDir))
+	env = append(env, fmt.Sprintf("CATALYST_DEFAULT_DIR=%s", defaultDir))
+
+	if err := os.WriteFile(filepath.Join(mceDir, "env.sh"), []byte(""), 00666); err != nil /* #nosec G306 */ {
+		return nil, err
+	}
+
+	if err := os.WriteFile(filepath.Join(mceDir, "dir.txt"), []byte(defaultDir), 00644); err != nil /* #nosec G306 */ {
+		return nil, err
+	}
 
 	return &shellCommandExecutor{
-		Env:        env,
-		Stdout:     params.Stdout,
-		Stderr:     params.Stderr,
-		WorkingDir: execWorkingDir,
-		CleanupDir: cleanupDir,
+		Stdout:         params.Stdout,
+		Stderr:         params.Stderr,
+		WorkingDir:     defaultDir,
+		Env:            env,
+		CloseExecutors: closeExecutors,
+		mceDir:         mceDir,
+		ctx:            ctx,
 	}, nil
 }
 
-func (sce *shellCommandExecutor) Close(_ bool) error {
-	if sce.CleanupDir != "" {
-		log.Debug().Msgf("close() is removing %s", sce.CleanupDir)
-		return os.RemoveAll(sce.CleanupDir)
+func (sce *shellCommandExecutor) Close(isError bool) error {
+	var err error
+	if !isError {
+		err = common.NewPipelineExecutor(sce.CloseExecutors...).TraceRegion("close-executors")(sce.ctx)
 	}
-	return nil
+	return err
 }
 
 func (sce *shellCommandExecutor) ExecuteCommand(ctx context.Context, command Command) error {
-	shell := []string{"/bin/bash", "-c"}
+	script := fmt.Sprintf(`
+	MCE_DIR=%s
+	cd $(cat ${MCE_DIR}/dir.txt)
+	set -a
+	. ${MCE_DIR}/env.sh
+	%s
+	CODEBUILD_LAST_EXIT=$?
+	export -p > ${MCE_DIR}/env.sh
+	pwd > ${MCE_DIR}/dir.txt
+	exit $CODEBUILD_LAST_EXIT`, sce.mceDir, strings.Join(command, " "))
+	scriptName := fmt.Sprintf("script-%d.sh", time.Now().UnixNano())
+	scriptPath := filepath.Join(sce.mceDir, scriptName)
+	if err := os.WriteFile(scriptPath, []byte(script), 00755); err != nil /* #nosec G306 */ {
+		return err
+	}
 
-	args := shell
-	args = append(args, strings.Join(command, " "))
-	cmd := exec.CommandContext(ctx, shell[0]) //#nosec G204
-	cmd.Path = shell[0]
-	cmd.Args = args
+	cmd := exec.CommandContext(ctx, "/bin/sh", scriptPath) //#nosec G204
 	cmd.Stdin = nil
 	cmd.Dir = sce.WorkingDir
 	cmd.Env = sce.Env
+
+	log.Debug().Msgf("ExecuteCommand: path=%s args=%s dir=%s env=%#v script=%s", cmd.Path, cmd.Args, cmd.Dir, cmd.Env, script)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -158,15 +183,6 @@ func streamPipe(dst io.Writer, src io.ReadCloser) {
 	_, _ = io.Copy(dst, reader)
 }
 
-func createCleanWorkdir(ctx context.Context, workdir string) (string, error) {
-	tmpdir, err := os.MkdirTemp(fs.TmpDir(), "executor-shell")
-	if err != nil {
-		return "", err
-	}
-	log.Ctx(ctx).Debug().Msgf("Created clean working directory %s", tmpdir)
-	return filepath.Join(tmpdir, filepath.Base(workdir)), nil
-}
-
 func copyDir(ctx context.Context, destdir string, sourcedir string, useGitIgnore bool) error {
 	if sourcedir == destdir {
 		return fmt.Errorf("unable to copyDir when sourcedir==destdir")
@@ -196,4 +212,79 @@ func copyDir(ctx context.Context, destdir string, sourcedir string, useGitIgnore
 		},
 	}
 	return filepath.Walk(sourcedir, fc.CollectFiles(ctx, []string{}))
+}
+
+func setOutputs(mceDir string, stdout io.Writer) common.Executor {
+	return func(context.Context) error {
+		f, err := os.Open(filepath.Join(mceDir, "env.sh"))
+		if err != nil {
+			return nil
+		}
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
+		pattern := regexp.MustCompile(`^export (.+)="(.+)"$`)
+		for scanner.Scan() {
+			line := scanner.Text()
+			kv := pattern.FindStringSubmatch(line)
+			if len(kv) == 3 {
+				fmt.Fprintf(stdout, "::set-output name=%s::%s\n", kv[1], kv[2])
+			}
+		}
+		return scanner.Err()
+	}
+}
+
+func copyOut(ctx context.Context, mceDir string, workingDir string, filemap *FileMap) common.Executor {
+	sourcePath := resolvePath(filemap.SourcePath, mceDir)
+	targetPath := resolvePath(filemap.TargetPath, workingDir)
+	return func(context.Context) error {
+		sources, err := filepath.Glob(sourcePath)
+		if err != nil {
+			return err
+		}
+		log.Debug().Msgf("clearing cache %s", targetPath)
+		if err := os.RemoveAll(targetPath); err != nil {
+			return err
+		}
+		log.Debug().Msgf("copying %v (%s) to %s", sources, sourcePath, targetPath)
+		for _, source := range sources {
+			if err := copyDir(
+				ctx,
+				targetPath,
+				source,
+				false,
+			); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+func symlink(mceDir string, workingDir string, filemap *FileMap) error {
+	if resolvePath(filemap.SourcePath, workingDir) != resolvePath(".", workingDir) {
+		sourcePath := resolvePath(filemap.SourcePath, workingDir)
+		targetPath := resolvePath(filemap.TargetPath, mceDir)
+		log.Debug().Msgf("symlink mount %s to %s", sourcePath, targetPath)
+		if err := os.MkdirAll(filepath.Dir(targetPath), 0755); err != nil {
+			return err
+		}
+		return os.Symlink(sourcePath, targetPath)
+	}
+	return nil
+}
+
+func interpolate(s string, vars map[string]string) string {
+	r := regexp.MustCompile(`\${?([a-zA-Z0-9_\-.]+)}?`)
+	symbols := regexp.MustCompile(`[${}]`)
+	repl := func(match string) string {
+		key := symbols.ReplaceAllString(match, "")
+		if val, ok := vars[key]; ok {
+			return val
+		}
+		return match
+	}
+	rtn := r.ReplaceAllStringFunc(s, repl)
+	log.Debug().Msgf("interpolate %s -> %s", s, rtn)
+	return rtn
 }

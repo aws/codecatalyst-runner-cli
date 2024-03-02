@@ -1,13 +1,8 @@
-//go:build all || docker
-// +build all docker
-
 package docker
 
 import (
 	"context"
 	"testing"
-
-	"github.com/docker/cli/cli/config"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -40,8 +35,6 @@ func TestCleanImage(t *testing.T) {
 
 func TestGetImagePullOptions(t *testing.T) {
 	ctx := context.Background()
-
-	config.SetDir("/non-existent/docker")
 
 	options, err := getImagePullOptions(ctx, newDockerPullExecutorInput{
 		Image:    "",

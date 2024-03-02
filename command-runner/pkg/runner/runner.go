@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"os"
 	"strings"
 
 	"github.com/aws/codecatalyst-runner-cli/command-runner/internal/containers"
@@ -120,6 +121,9 @@ const (
 
 // DefaultExecutionType determines the appropriate default
 func DefaultExecutionType() ExecutionType {
+	if _, ok := os.LookupEnv("__MDE_ENVIRONMENT_ID"); ok {
+		return ExecutionTypeShell
+	}
 	defaultSP := containers.DefaultServiceProvider(context.Background())
 	switch defaultSP {
 	case containers.Finch:

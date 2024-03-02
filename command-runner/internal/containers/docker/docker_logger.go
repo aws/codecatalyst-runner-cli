@@ -1,5 +1,3 @@
-//go:build !(WITHOUT_DOCKER || !(linux || darwin || windows))
-
 package docker
 
 import (

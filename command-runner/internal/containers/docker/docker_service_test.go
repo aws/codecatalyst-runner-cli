@@ -1,6 +1,3 @@
-//go:build all || docker
-// +build all docker
-
 package docker
 
 import (
@@ -9,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
@@ -27,6 +23,8 @@ func TestImageExistsLocally(t *testing.T) {
 	// to help make this test reliable and not flaky, we need to have
 	// an image that will exist, and onew that won't exist
 
+	ctx = log.Logger.WithContext(ctx)
+
 	dcsp := &ServiceProvider{}
 	dcs := dcsp.NewContainerService()
 
@@ -41,13 +39,12 @@ func TestImageExistsLocally(t *testing.T) {
 	assert.Equal(t, false, invalidImagePlatform)
 
 	// pull an image
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := getDockerClient(ctx)
 	assert.Nil(t, err)
-	cli.NegotiateAPIVersion(context.Background())
 
 	// Chose alpine latest because it's so small
 	// maybe we should build an image instead so that tests aren't reliable on dockerhub
-	readerDefault, err := cli.ImagePull(ctx, "node:16-buster-slim", types.ImagePullOptions{
+	readerDefault, err := cli.ImagePull(ctx, "alpine:3", types.ImagePullOptions{
 		Platform: "linux/amd64",
 	})
 	assert.Nil(t, err)
@@ -55,12 +52,12 @@ func TestImageExistsLocally(t *testing.T) {
 	_, err = io.ReadAll(readerDefault)
 	assert.Nil(t, err)
 
-	imageDefaultArchExists, err := dcs.ImageExistsLocally(ctx, "node:16-buster-slim", "linux/amd64")
+	imageDefaultArchExists, err := dcs.ImageExistsLocally(ctx, "alpine:3", "linux/amd64")
 	assert.Nil(t, err)
 	assert.Equal(t, true, imageDefaultArchExists)
 
 	// Validate if another architecture platform can be pulled
-	readerArm64, err := cli.ImagePull(ctx, "node:16-buster-slim", types.ImagePullOptions{
+	readerArm64, err := cli.ImagePull(ctx, "alpine:3", types.ImagePullOptions{
 		Platform: "linux/arm64",
 	})
 	assert.Nil(t, err)
@@ -68,7 +65,7 @@ func TestImageExistsLocally(t *testing.T) {
 	_, err = io.ReadAll(readerArm64)
 	assert.Nil(t, err)
 
-	imageArm64Exists, err := dcs.ImageExistsLocally(ctx, "node:16-buster-slim", "linux/arm64")
+	imageArm64Exists, err := dcs.ImageExistsLocally(ctx, "alpine:3", "linux/arm64")
 	assert.Nil(t, err)
 	assert.Equal(t, true, imageArm64Exists)
 }

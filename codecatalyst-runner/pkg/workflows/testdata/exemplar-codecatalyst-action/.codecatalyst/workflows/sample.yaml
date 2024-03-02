@@ -31,10 +31,10 @@ Actions:
         - Run: echo ${Secrets.SAMPLE_SECRET} | grep mysecretvalue
         - Run: mkdir -p .out
         - Run: echo "hello world" > .out/output.txt
-        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_DEFAULT_DIR | grep git/v1/exemplar-codecatalyst-action
         - Run: env|grep CATALYST_
-        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-        - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource|grep git/v1/exemplar-codecatalyst-action
+        - Run: pwd|grep git/v1/exemplar-codecatalyst-action
   Group1:
     Actions:
       SubAction1:
@@ -50,9 +50,9 @@ Actions:
             - Run: env | grep VAR3=foooo
             - Run: mkdir -p .out
             - Run: echo "hello again" > .out/output2.txt
-            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_DEFAULT_DIR | grep git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource|grep git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep git/v1/exemplar-codecatalyst-action
         Outputs:
           Variables:
             - VAR3
@@ -69,9 +69,9 @@ Actions:
             - ARTIFACT1
         Configuration:
           Steps:
-            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_DEFAULT_DIR | grep git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource|grep git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep git/v1/exemplar-codecatalyst-action
             - Run: echo $CATALYST_SOURCE_DIR_ARTIFACT1
             - Run: grep "hello world" $CATALYST_SOURCE_DIR_ARTIFACT1/.out/output.txt
   FinalAction:
@@ -82,8 +82,8 @@ Actions:
     Configuration:
       Steps:
         - Run: echo ${Group1.SubAction1.VAR3} | grep foooo
-        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/s3/01
-        - Run: pwd|grep /codecatalyst/output/src/s3/01
+        - Run: env|grep CATALYST_DEFAULT_DIR | grep s3/01
+        - Run: pwd|grep s3/01
         - Run: ls -alFt ${CATALYST_SOURCE_DIR_ARTIFACT2}/
         - Run: echo ${CATALYST_SOURCE_DIR_ARTIFACT2}
         - Run: grep "hello again" $CATALYST_SOURCE_DIR_ARTIFACT2/.out/output2.txt

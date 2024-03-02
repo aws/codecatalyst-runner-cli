@@ -15,13 +15,13 @@ jobs:
     name: promote
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ssh-key: ${{secrets.SSH_DEPLOY_KEY}}
           fetch-depth: 0
           ref: main
       - uses: fregante/setup-git-user@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
           check-latest: true
