@@ -3,6 +3,7 @@ on: [pull_request, workflow_dispatch]
 
 env:
   CGO_ENABLED: 0
+  TEST_CATALYST_IMAGE: public.ecr.aws/docker/library/node:20-bookworm-slim
 
 jobs:
   scan:
@@ -59,6 +60,8 @@ jobs:
 
       - name: Run tests
         run: make test
+        env:
+          CATALYST_IMAGE: docker://${TEST_CATALYST_IMAGE}
 
       - name: Generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -91,6 +94,7 @@ jobs:
         run: |
           brew install docker
           colima start
+          docker pull ${TEST_CATALYST_IMAGE}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -106,6 +110,8 @@ jobs:
 
       - name: Run tests
         run: make test
+        env:
+          CATALYST_IMAGE: docker://${TEST_CATALYST_IMAGE}
 
   snapshot-ccr-cli:
     name: snapshot-ccr-cli

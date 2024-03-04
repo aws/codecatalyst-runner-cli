@@ -13,23 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupSuite(_ testing.TB) func(tb testing.TB) {
-	oldValue := os.Getenv("CATALYST_IMAGE")
-	os.Setenv("CATALYST_IMAGE", "docker://public.ecr.aws/docker/library/node:20-bookworm-slim")
-	return func(_ testing.TB) {
-		os.Setenv("CATALYST_IMAGE", oldValue)
-	}
-}
-
 func TestRun(t *testing.T) {
 	ctx := context.Background()
 
 	if testing.Short() {
 		t.Skip("skipping test in short mode")
 	}
-
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
 
 	type TestRunTargetParams struct {
 		TestCase      string

@@ -56,7 +56,7 @@ brews:
   - name: codecatalyst-runner-cli
 
     # GitHub/GitLab repository to push the formula to
-    tap:
+    repository:
       owner: aws
       name: homebrew-tap
 
