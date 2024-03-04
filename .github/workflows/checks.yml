@@ -61,7 +61,7 @@ jobs:
       - name: Run tests
         run: make test
         env:
-          CATALYST_IMAGE: docker://${TEST_CATALYST_IMAGE}
+          CATALYST_IMAGE: docker://${{ env.TEST_CATALYST_IMAGE }}
 
       - name: Generate code coverage report
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -111,7 +111,7 @@ jobs:
       - name: Run tests
         run: make test
         env:
-          CATALYST_IMAGE: docker://${TEST_CATALYST_IMAGE}
+          CATALYST_IMAGE: docker://${{ env.TEST_CATALYST_IMAGE }}
 
   snapshot-ccr-cli:
     name: snapshot-ccr-cli
