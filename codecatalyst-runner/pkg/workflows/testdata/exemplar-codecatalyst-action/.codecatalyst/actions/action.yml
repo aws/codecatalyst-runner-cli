@@ -3,12 +3,12 @@ Name: 'hello-world-action'
 Version: '0.0.0'
 Description: 'This Action greets someone and outputs who was greeted'
 Configuration:
-  who-to-greet:
+  whoToGreet:
     Description: 'Who are we greeting here'
     Required: true
     DisplayName: 'Who to greet'
     Type: string
-  how-to-greet:
+  howToGreet:
     Description: 'How to greet the person'
     Required: false
     DisplayName: 'How to greet'

@@ -1,6 +1,3 @@
-//go:build all || docker
-// +build all docker
-
 package docker
 
 import (

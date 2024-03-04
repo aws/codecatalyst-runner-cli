@@ -178,7 +178,7 @@ func TestExecutorContainer(t *testing.T) {
 			})
 			mockContainer := &cmock.MockContainer{}
 			mockContainer.On("Pull", true).Return(nil)
-			mockContainer.On("Exec", []string{"/bin/sh", "/tmp/mce/tmp/envout.sh"}, emptyMap, "", "/").Return(nil)
+			mockContainer.On("Exec", []string{"/bin/bash", "/tmp/mce/tmp/envout.sh"}, emptyMap, "", "/").Return(nil)
 			mockContainer.On("Remove").Return(nil)
 			mockContainer.On("Create", emptyList, emptyList).Return(nil)
 			mockContainer.On("Start", false).Return(nil)

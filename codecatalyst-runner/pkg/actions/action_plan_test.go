@@ -174,14 +174,14 @@ func TestNewActionPlan(t *testing.T) {
 			},
 			ExpectedCommandGroups: []*runner.CommandGroup{
 				{
-					Image:      CodeCatalystImage,
+					Image:      CodeCatalystImage(),
 					Entrypoint: runner.Command{"/bin/cat"},
 					Commands: []runner.Command{
 						{"node", "/codecatalyst/output/action/test/pre-command"},
 					},
 				},
 				{
-					Image:      CodeCatalystImage,
+					Image:      CodeCatalystImage(),
 					Entrypoint: runner.Command{"/bin/cat"},
 					Commands: []runner.Command{
 						{"node", "/codecatalyst/output/action/test/main-command"},

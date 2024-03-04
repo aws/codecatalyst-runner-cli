@@ -33,8 +33,8 @@ func TestExecutorShell(t *testing.T) {
 			},
 			Commands: []CommandTest{
 				{
-					Command:        "echo -n $FOO",
-					ExpectedOutput: "BAR",
+					Command:        "echo $FOO",
+					ExpectedOutput: "BAR\n",
 				},
 				{
 					Command:        "ls",
@@ -58,17 +58,18 @@ func TestExecutorShell(t *testing.T) {
 					},
 				},
 				Env: map[string]string{
-					"FOO": "BAR",
+					"CATALYST_SOURCE_DIR_WorkflowSource": ".",
+					"FOO":                                "BAR",
 				},
 			},
 			Commands: []CommandTest{
 				{
-					Command:        "echo -n $FOO",
-					ExpectedOutput: "BAR",
+					Command:        "echo $FOO",
+					ExpectedOutput: "BAR\n",
 				},
 				{
-					Command:        "ls",
-					ExpectedOutput: "main.py\n",
+					Command:        "ls | grep -c main.py",
+					ExpectedOutput: "1\n",
 				},
 				{
 					Command:        "pwd | grep -v -c testdata/workingdir/basic",
@@ -120,6 +121,59 @@ func TestExecutorShell(t *testing.T) {
 				assert.NoError(err, "%s - error: %s", tt.TestCase, cmd)
 				assert.Equal(cmd.ExpectedOutput, stdout.String(), "%s - output: %s", tt.TestCase, cmd)
 			}
+		})
+	}
+}
+
+func TestInterpolate(t *testing.T) {
+	type TestParams struct {
+		TestCase       string
+		Input          string
+		ExpectedOutput string
+	}
+
+	vars := map[string]string{
+		"foo":         "bar",
+		"with-hyphen": "Alice",
+	}
+
+	for _, tt := range []*TestParams{
+		{
+			TestCase:       "No variables",
+			Input:          "hello",
+			ExpectedOutput: "hello",
+		},
+		{
+			TestCase:       "Simple",
+			Input:          "${foo}",
+			ExpectedOutput: "bar",
+		},
+		{
+			TestCase:       "Simple no curly",
+			Input:          "$foo",
+			ExpectedOutput: "bar",
+		},
+		{
+			TestCase:       "Missing",
+			Input:          "${baz}",
+			ExpectedOutput: "${baz}",
+		},
+		{
+			TestCase:       "Embedded",
+			Input:          "PRE${foo}POST",
+			ExpectedOutput: "PREbarPOST",
+		},
+		{
+			TestCase:       "Hypen",
+			Input:          "Hello ${with-hyphen}!",
+			ExpectedOutput: "Hello Alice!",
+		},
+	} {
+		t.Run(tt.TestCase, func(t *testing.T) {
+			assert := assert.New(t)
+
+			output := interpolate(tt.Input, vars)
+			assert.Equal(tt.ExpectedOutput, output)
 		})
 	}
 }

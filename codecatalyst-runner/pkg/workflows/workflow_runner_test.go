@@ -46,6 +46,14 @@ func TestRun(t *testing.T) {
 			},
 		},
 		{
+			TestCase:      "sample-shell",
+			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/sample.yaml",
+			ExecutionType: runner.ExecutionTypeShell,
+			Secrets: map[string]string{
+				"SAMPLE_SECRET": "mysecretvalue",
+			},
+		},
+		{
 			TestCase:      "cache-finch",
 			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/cache.yaml",
 			ExecutionType: runner.ExecutionTypeFinch,
@@ -56,6 +64,11 @@ func TestRun(t *testing.T) {
 			ExecutionType: runner.ExecutionTypeDocker,
 		},
 		{
+			TestCase:      "cache-shell",
+			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/cache-shell.yaml",
+			ExecutionType: runner.ExecutionTypeShell,
+		},
+		{
 			TestCase:      "custom-finch",
 			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/custom.yaml",
 			ExecutionType: runner.ExecutionTypeFinch,
@@ -64,6 +77,11 @@ func TestRun(t *testing.T) {
 			TestCase:      "custom-docker",
 			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/custom.yaml",
 			ExecutionType: runner.ExecutionTypeDocker,
+		},
+		{
+			TestCase:      "custom-shell",
+			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/custom.yaml",
+			ExecutionType: runner.ExecutionTypeShell,
 		},
 		{
 			TestCase:      "shared-finch",
@@ -81,8 +99,15 @@ func TestRun(t *testing.T) {
 				"SAMPLE_SECRET": "mysecretvalue",
 			},
 		},
+		{
+			TestCase:      "shared-shell",
+			WorkflowPath:  "testdata/exemplar-codecatalyst-action/.codecatalyst/workflows/shared.yaml",
+			ExecutionType: runner.ExecutionTypeShell,
+			Secrets: map[string]string{
+				"SAMPLE_SECRET": "mysecretvalue",
+			},
+		},
 	} {
-		// zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 		log.Logger = log.Logger.With().Caller().Stack().Logger()
 		ctx = log.Logger.WithContext(ctx)

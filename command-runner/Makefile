@@ -1,5 +1,3 @@
-TAGS ?= all
-
 .PHONY: all
 all: deps format lint test
 
@@ -18,11 +16,11 @@ lint:
 
 .PHONY: test
 test:
-	go test -json -v -coverprofile=coverage.txt  --tags=$(TAGS) -test.timeout=10m ./... 2>&1 | gotestfmt
+	go test -json -v -coverprofile=coverage.txt -test.timeout=10m ./... 2>&1 | gotestfmt
 
 .PHONY: test-short
 test-short:
-	go test -json -v -coverprofile=coverage.txt  --tags=$(TAGS) -short ./... 2>&1 | gotestfmt
+	go test -json -v -coverprofile=coverage.txt -short ./... 2>&1 | gotestfmt
 
 .PHONY: upgrade
 upgrade:

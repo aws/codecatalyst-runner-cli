@@ -243,7 +243,7 @@ env -0 | while IFS='=' read -r -d '' n v; do  printf "::set-output name=%s::%s\n
 func setupCopyAndCloseExecutors(actionContainer types.Container, workingDir string, filemaps []*FileMap) ([]common.Executor, []common.Executor, error) {
 	copyExecutors := []common.Executor{}
 	closeExecutors := []common.Executor{
-		actionContainer.Exec([]string{"/bin/sh", "/tmp/mce/tmp/envout.sh"}, nil, "", "/"),
+		actionContainer.Exec([]string{"/bin/bash", "/tmp/mce/tmp/envout.sh"}, nil, "", "/"),
 	}
 	for _, filemap := range filemaps {
 		switch filemap.Type {

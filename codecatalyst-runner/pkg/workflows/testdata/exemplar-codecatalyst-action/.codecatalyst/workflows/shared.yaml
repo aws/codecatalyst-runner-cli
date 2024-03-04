@@ -15,8 +15,8 @@ Actions:
       Sources:
         - WorkflowSource
     Configuration:
-      who-to-greet: 'TEST'
-      how-to-greet: 'TEST'
+      whoToGreet: 'TEST'
+      howToGreet: 'TEST'
   FirstAction:
     Identifier: aws/build@v1
     Inputs:
@@ -41,9 +41,9 @@ Actions:
         - Run: echo ${Secrets.SAMPLE_SECRET} | grep mysecretvalue
         - Run: mkdir -p .out
         - Run: echo "hello world" > .out/output.txt
-        - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-        - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_DEFAULT_DIR | grep git/v1/exemplar-codecatalyst-action
+        - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource|grep git/v1/exemplar-codecatalyst-action
+        - Run: pwd|grep git/v1/exemplar-codecatalyst-action
   Group1:
     Actions:
       SubAction2:
@@ -52,8 +52,8 @@ Actions:
           - FirstAction
         Configuration:
           Steps:
-            - Run: env|grep CATALYST_DEFAULT_DIR=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource=/codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
-            - Run: pwd|grep /codecatalyst/output/src/git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_DEFAULT_DIR | grep git/v1/exemplar-codecatalyst-action
+            - Run: env|grep CATALYST_SOURCE_DIR_WorkflowSource|grep git/v1/exemplar-codecatalyst-action
+            - Run: pwd|grep git/v1/exemplar-codecatalyst-action
             - Run: grep "hello world" ./.out/output.txt
 

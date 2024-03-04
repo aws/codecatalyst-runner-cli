@@ -1,5 +1,3 @@
-//go:build !(WITHOUT_DOCKER || !(linux || darwin || windows))
-
 package docker
 
 import (
@@ -21,7 +19,6 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/docker/cli/cli/connhelper"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -109,46 +106,6 @@ type dockerContainer struct {
 	input ctypes.NewContainerInput
 	UID   int
 	GID   int
-}
-
-// getDockerClient returns the Docker APIClient
-func getDockerClient(ctx context.Context) (cli client.APIClient, err error) {
-	dockerHost := os.Getenv("DOCKER_HOST")
-
-	if strings.HasPrefix(dockerHost, "ssh://") {
-		var helper *connhelper.ConnectionHelper
-
-		helper, err = connhelper.GetConnectionHelper(dockerHost)
-		if err != nil {
-			return nil, err
-		}
-		cli, err = client.NewClientWithOpts(
-			client.WithHost(helper.Host),
-			client.WithDialContext(helper.Dialer),
-		)
-	} else {
-		cli, err = client.NewClientWithOpts(client.FromEnv)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to docker daemon: %w", err)
-	}
-	cli.NegotiateAPIVersion(ctx)
-
-	return cli, nil
-}
-
-func (cr *dockerContainer) connect() common.Executor {
-	return func(ctx context.Context) error {
-		if cr.cli != nil {
-			return nil
-		}
-		cli, err := getDockerClient(ctx)
-		if err != nil {
-			return err
-		}
-		cr.cli = cli
-		return nil
-	}
 }
 
 func (cr *dockerContainer) Close() common.Executor {

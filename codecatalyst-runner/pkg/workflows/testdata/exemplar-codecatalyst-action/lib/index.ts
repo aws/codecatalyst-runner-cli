@@ -9,10 +9,10 @@ import * as space from '@aws/codecatalyst-space';
 
 try {
     // Get inputs from the action
-    const input_WhoToGreet = core.getInput('who-to-greet'); // Who are we greeting here
-    console.log(input_WhoToGreet);
-    const input_HowToGreet = core.getInput('how-to-greet'); // How to greet the person
-    console.log(input_HowToGreet);
+    const input_WhoToGreet = core.getInput('whoToGreet'); // Who are we greeting here
+    console.log(`WHO: ${input_WhoToGreet}`);
+    const input_HowToGreet = core.getInput('howToGreet'); // How to greet the person
+    console.log(`HOW: ${input_HowToGreet}`);
 
     // Interact with CodeCatalyst entities
     console.log(`Current CodeCatalyst space ${space.getSpace().name}`);

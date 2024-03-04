@@ -11,14 +11,10 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
-    Configuration:     
+    Configuration:
       Steps:
         - Run: WhoToGreet=Alice
         - Run: HowToGreet=Hey
-        - Run: df
-        - Run: env | grep CATALYST
-        - Run: pwd
-        - Run: ls -alFt
     Outputs:
       Variables:
         - WhoToGreet
@@ -32,8 +28,8 @@ Actions:
         - Name: Who
           Value: ${FirstAction.WhoToGreet}
     Configuration:
-      who-to-greet: ${Who}
-      how-to-greet: ${FirstAction.HowToGreet}
+      whoToGreet: ${Who}
+      howToGreet: ${FirstAction.HowToGreet}
     Outputs:
       Variables:
         - greeting
@@ -42,6 +38,6 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
-    Configuration:     
+    Configuration:
       Steps:
         - Run: echo ${Custom.greeting} | grep "Hey Alice"

@@ -56,3 +56,6 @@ attribution:
 upgrade:
 	go work sync
 	make attribution
+
+install:
+	@$(MAKE) -C codecatalyst-runner install
