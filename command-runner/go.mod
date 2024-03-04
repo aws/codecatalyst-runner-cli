@@ -12,7 +12,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/moby/buildkit v0.12.5
 	github.com/moby/patternmatcher v0.6.0
-	github.com/opencontainers/image-spec v1.1.0-rc6
+	github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/selinux v1.11.0
 	github.com/rivo/tview v0.0.0-20240204151237-861aa94d61c8
 	github.com/rs/zerolog v1.32.0
