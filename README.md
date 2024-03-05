@@ -15,7 +15,7 @@ brew install aws/tap/codecatalyst-runner-cli
 To install manually, we're distributing binaries from our GitHub releases:
 
 <details>
-  <summary>Instructions for installing Copilot for your platform</summary>
+  <summary>Instructions for installing for your platform</summary>
 
 | OS | Platform | Command to install |
 |----|----------|--------------------|
