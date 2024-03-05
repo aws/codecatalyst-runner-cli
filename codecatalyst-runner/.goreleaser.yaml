@@ -57,14 +57,24 @@ brews:
 
     # GitHub/GitLab repository to push the formula to
     repository:
-      owner: aws
+      owner: codecatalyst-runner-cli-bot
       name: homebrew-tap
+      branch: master
+      token: "{{ .Env.BOT_TOKEN }}"
+      pull_request:
+        enabled: true
+        base:
+          owner: aws
+          name: homebrew-tap
+          branch: master
+
+
 
     url_template: "https://github.com/aws/codecatalyst-runner-cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 
     commit_author:
-      name: codecatalyst-runner-cli
-      email: codecatalyst-runner-cli@no-reply.github.com
+      name: codecatalyst-runner-cli-bot
+      email: codecatalyst-runner-cli-bot@no-reply.github.com
 
     # The project name and current git tag are used in the format string.
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"

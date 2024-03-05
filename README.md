@@ -6,7 +6,25 @@ This repository contains a CLI to run [Amazon CodeCatalyst workflows](https://do
 
 ## Installation
 
-Clone this repository and run: `make install`
+To install with homebrew:
+
+```sh
+brew install aws/tap/codecatalyst-runner-cli
+```
+
+To install manually, we're distributing binaries from our GitHub releases:
+
+<details>
+  <summary>Instructions for installing Copilot for your platform</summary>
+
+| OS | Platform | Command to install |
+|----|----------|--------------------|
+| MacOS | x86 (64-bit) | `curl -sL https://github.com/aws/codecatalyst-runner-cli/releases/latest/download/ccr_Darwin_x86_64.tar.gz -o - \| tar -zx ccr && sudo mv ccr /usr/local/bin/ccr && ccr --help` |
+| MacOS | ARM | `curl -sL https://github.com/aws/codecatalyst-runner-cli/releases/latest/download/ccr_Darwin_arm64.tar.gz -o - \| tar -zx ccr && sudo mv ccr /usr/local/bin/ccr && ccr --help` |
+| Linux | x86 (64-bit) | `curl -sL https://github.com/aws/codecatalyst-runner-cli/releases/latest/download/ccr_Linux_x86_64.tar.gz -o - \| tar -zx ccr && sudo mv ccr /usr/local/bin/ccr && ccr --help` |
+| Linux | ARM | `curl -sL https://github.com/aws/codecatalyst-runner-cli/releases/latest/download/ccr_Linux_arm64.tar.gz -o - \| tar -zx ccr && sudo mv ccr /usr/local/bin/ccr && ccr --help` |
+
+</details>
 
 ## Usage
 
