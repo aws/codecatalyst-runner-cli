@@ -1,5 +1,8 @@
 name: Dependabot auto-approve
-on: pull_request
+on:
+  pull_request:
+    branches:
+    - main
 
 
 jobs:
@@ -24,9 +27,9 @@ jobs:
           fi
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}
       - name: Enable auto-merge for Dependabot PRs
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.BOT_TOKEN}}

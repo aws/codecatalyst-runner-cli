@@ -1,11 +1,13 @@
 name: promote
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - VERSION
-      - "*/VERSION"
+  workflow_dispatch: {}
+  #push:
+  #  branches:
+  #    - main
+  #  paths-ignore:
+  #    - VERSION
+  #    - "*/VERSION"
+  #    - README.md
 
 env:
   CGO_ENABLED: 0
