@@ -1,4 +1,4 @@
-name: release-codecatalyst-runner
+name: release
 on:
   push:
     tags:
