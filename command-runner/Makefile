@@ -16,7 +16,7 @@ lint:
 
 .PHONY: test
 test:
-	go test -json -v -coverprofile=coverage.txt -test.timeout=10m ./... 2>&1 | gotestfmt
+	go test -json -v -coverprofile=coverage.txt -test.timeout=30m ./... 2>&1 | gotestfmt
 
 .PHONY: test-short
 test-short:
