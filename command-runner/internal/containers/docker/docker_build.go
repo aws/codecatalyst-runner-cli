@@ -13,8 +13,8 @@ import (
 	"github.com/docker/docker/pkg/archive"
 	"github.com/rs/zerolog/log"
 
-	"github.com/moby/buildkit/frontend/dockerfile/dockerignore"
 	"github.com/moby/patternmatcher"
+	"github.com/moby/patternmatcher/ignorefile"
 )
 
 // BuildImage function to create a run executor for the container
@@ -80,7 +80,7 @@ func createBuildContext(ctx context.Context, contextDir string, relDockerfile st
 
 	var excludes []string
 	if err == nil {
-		excludes, err = dockerignore.ReadAll(f)
+		excludes, err = ignorefile.ReadAll(f)
 		if err != nil {
 			return nil, err
 		}
