@@ -63,6 +63,9 @@ jobs:
       - name: Install dev dependencies
         run: make dev-deps
 
+      - name: Pull test image
+        run: docker pull ${TEST_CATALYST_IMAGE}
+
       - name: Run tests
         run: make test
         env:
