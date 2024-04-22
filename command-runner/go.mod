@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/distribution/reference v0.5.0
-	github.com/docker/cli v25.0.4+incompatible
+	github.com/docker/cli v26.0.2+incompatible
 	github.com/docker/docker v25.0.5+incompatible
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/go-git/go-billy/v5 v5.5.0
