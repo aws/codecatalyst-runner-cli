@@ -3,7 +3,7 @@ module github.com/aws/codecatalyst-runner-cli/command-runner
 go 1.21.0
 
 require (
-	github.com/distribution/reference v0.5.0
+	github.com/distribution/reference v0.6.0
 	github.com/docker/cli v25.0.4+incompatible
 	github.com/docker/docker v25.0.5+incompatible
 	github.com/gdamore/tcell/v2 v2.7.4
