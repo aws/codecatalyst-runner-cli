@@ -14,7 +14,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0
 	github.com/opencontainers/selinux v1.11.0
 	github.com/rivo/tview v0.0.0-20240225120200-5605142ca62e
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 )
 
