@@ -137,7 +137,7 @@ jobs:
       - uses: anchore/sbom-action/download-syft@v0.15.9
       - uses: sigstore/cosign-installer@v3
       - name: GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           workdir: codecatalyst-runner
           version: latest
