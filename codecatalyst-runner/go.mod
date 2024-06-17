@@ -11,7 +11,7 @@ require (
 	github.com/manifoldco/promptui v0.9.0
 	github.com/owenrumney/go-sarif v1.1.1
 	github.com/rs/zerolog v1.32.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
 	golang.org/x/term v0.18.0
