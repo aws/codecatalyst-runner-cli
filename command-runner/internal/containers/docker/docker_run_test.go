@@ -105,7 +105,7 @@ func TestDockerExecFailure(t *testing.T) {
 
 	client := &mockDockerClient{}
 	client.On("ContainerExecCreate", ctx, "123", mock.AnythingOfType("container.ExecOptions")).Return(types.IDResponse{ID: "id"}, nil)
-	client.On("ContainerExecAttach", ctx, "id", mock.AnythingOfType("types.ExecStartCheck")).Return(types.HijackedResponse{
+	client.On("ContainerExecAttach", ctx, "id", mock.AnythingOfType("container.ExecStartOptions")).Return(types.HijackedResponse{
 		Conn:   conn,
 		Reader: bufio.NewReader(strings.NewReader("output")),
 	}, nil)
