@@ -9,7 +9,7 @@ import (
 	"github.com/aws/codecatalyst-runner-cli/command-runner/pkg/common"
 
 	"github.com/distribution/reference"
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/rs/zerolog/log"
 )
@@ -73,8 +73,8 @@ func newDockerPullExecutor(input newDockerPullExecutorInput) common.Executor {
 	}
 }
 
-func getImagePullOptions(ctx context.Context, input newDockerPullExecutorInput) (types.ImagePullOptions, error) {
-	imagePullOptions := types.ImagePullOptions{
+func getImagePullOptions(ctx context.Context, input newDockerPullExecutorInput) (image.PullOptions, error) {
+	imagePullOptions := image.PullOptions{
 		Platform: input.Platform,
 	}
 

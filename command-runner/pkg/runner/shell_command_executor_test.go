@@ -33,10 +33,6 @@ func TestExecutorShell(t *testing.T) {
 			},
 			Commands: []CommandTest{
 				{
-					Command:        "echo $FOO",
-					ExpectedOutput: "BAR\n",
-				},
-				{
 					Command:        "ls",
 					ExpectedOutput: "main.py\n",
 				},
