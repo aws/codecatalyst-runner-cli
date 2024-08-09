@@ -267,7 +267,7 @@ func (cr *dockerContainer) exec(cmd []string, env map[string]string, user, workd
 		}
 		log.Ctx(ctx).Printf("Working directory '%s'", wd)
 
-		idResp, err := cr.cli.ContainerExecCreate(ctx, cr.id, types.ExecConfig{
+		idResp, err := cr.cli.ContainerExecCreate(ctx, cr.id, container.ExecOptions{
 			User:         user,
 			Cmd:          cmd,
 			WorkingDir:   wd,
@@ -280,7 +280,7 @@ func (cr *dockerContainer) exec(cmd []string, env map[string]string, user, workd
 			return fmt.Errorf("failed to create exec: %w", err)
 		}
 
-		resp, err := cr.cli.ContainerExecAttach(ctx, idResp.ID, types.ExecStartCheck{
+		resp, err := cr.cli.ContainerExecAttach(ctx, idResp.ID, container.ExecStartOptions{
 			Tty: true,
 		})
 		if err != nil {
@@ -312,7 +312,7 @@ func (cr *dockerContainer) exec(cmd []string, env map[string]string, user, workd
 
 func (cr *dockerContainer) tryReadID(opt string, cbk func(id int)) common.Executor {
 	return func(ctx context.Context) error {
-		idResp, err := cr.cli.ContainerExecCreate(ctx, cr.id, types.ExecConfig{
+		idResp, err := cr.cli.ContainerExecCreate(ctx, cr.id, container.ExecOptions{
 			Cmd:          []string{"id", opt},
 			AttachStdout: true,
 			AttachStderr: true,
@@ -338,7 +338,7 @@ func (cr *dockerContainer) tryReadID(opt string, cbk func(id int)) common.Execut
 			return nil
 		}
 
-		resp, err := cr.cli.ContainerExecAttach(ctx, idResp.ID, types.ExecStartCheck{})
+		resp, err := cr.cli.ContainerExecAttach(ctx, idResp.ID, container.ExecStartOptions{})
 		if err != nil {
 			log.Ctx(ctx).Warn().Err(err).Msgf("tryReadID - Unable to attach exec for container=%s", cr.id)
 			return nil
@@ -439,7 +439,7 @@ func (cr *dockerContainer) copyIn(containerPath string, hostPath string, useGitI
 		}
 
 		log.Ctx(ctx).Printf("Extracting content from '%s' to '%s'", tarFile.Name(), containerPath)
-		if err := cr.cli.CopyToContainer(ctx, cr.id, "/", tarFile, types.CopyToContainerOptions{}); err != nil {
+		if err := cr.cli.CopyToContainer(ctx, cr.id, "/", tarFile, container.CopyToContainerOptions{}); err != nil {
 			return fmt.Errorf("failed to copy content to container: %w", err)
 		}
 		return nil
