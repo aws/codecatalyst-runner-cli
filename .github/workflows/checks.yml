@@ -93,7 +93,7 @@ jobs:
 
   test-macos:
     name: test-macos
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
         with:
@@ -101,6 +101,7 @@ jobs:
       - name: Install and start Colima
         run: |
           brew install docker
+          brew install colima
           colima start
           docker pull ${TEST_CATALYST_IMAGE}
 
